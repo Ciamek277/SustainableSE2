@@ -1,37 +1,129 @@
 # GreenLint
 
-**GreenLint** is a pip-installable CLI that flags common **energy-related** Python anti-patterns using the **`ast`** module. It does **not** read hardware sensors from your source code. Per-rule **Joules** and **CO₂e** “savings” come from **`experiments/results/summary.json`**, produced by comparing **`benchmarks/eco1`–`eco7`** `bad.py` vs `good.py` runs (same kind of work, bad pattern vs fixed pattern).
+CLI that finds **energy-related Python anti-patterns** with the **`ast`** module. Savings numbers (**Joules**, **CO₂e**, **weights**) come from **`experiments/results/summary.json`**, which you can regenerate by running benchmarks (`bad.py` vs `good.py` per rule). This is **not** a hardware power meter.
 
-## Install
+---
+
+## What you need
+
+- **Python 3.10+**
+- A clone of this repo; below, **`REPO`** means the folder that contains `pyproject.toml` (e.g. `.../SustainableSE2`).
+
+---
+
+## 1. Install (do this once per machine)
+
+Open a terminal and run:
 
 ```bash
-cd project2/SustainableSE2   # or your clone path
-python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+cd REPO
+python3 -m venv .venv
+```
+
+Activate the venv:
+
+- **macOS / Linux:** `source .venv/bin/activate`
+- **Windows (cmd):** `.venv\Scripts\activate.bat`
+- **Windows (PowerShell):** `.venv\Scripts\Activate.ps1`
+
+Install the package in editable mode:
+
+```bash
 pip install -e .
 ```
 
-Optional extras:
+That installs the **`greenlint`** command (see `pyproject.toml` → `[project.scripts]`).
+
+**Optional:**
 
 ```bash
-pip install -e ".[dev]"        # pytest, etc.
-pip install -e ".[benchmarks]" # CodeCarbon (only if you enable it; see below)
+pip install -e ".[dev]"        # pytest (for running tests)
+pip install -e ".[benchmarks]" # pandas + codecarbon (needed to run experiments/benchmarks)
 ```
 
-## Run the CLI
+---
+
+## 2. Run the linter (`greenlint`)
+
+Always run these **from `REPO`** (or use absolute paths). The last argument is **one** path: a **`.py` file** or a **directory** (all `*.py` files under it are scanned).
+
+### Examples that work in this repo
+
+Lint a single benchmark file (expect warnings on `bad.py`):
 
 ```bash
-greenlint path/to/file_or_dir.py
+cd REPO
+source .venv/bin/activate   # if not already active
+
+greenlint benchmarks/eco1/bad.py
+greenlint benchmarks/eco1/good.py
+```
+
+Lint all benchmarks:
+
+```bash
 greenlint benchmarks/
-greenlint --summary experiments/results/summary.json myapp/
 ```
 
-Each finding can show estimated savings from `summary.json`. With multiple files, a final line prints **`Total warnings: N`**.
+Use an explicit summary file (same defaults as the copy next to the package when installed editable):
+
+```bash
+greenlint --summary experiments/results/summary.json benchmarks/eco3/bad.py
+```
+
+**`--summary PATH`** — JSON file with per-rule `delta_joules_median`, `weight`, etc. If you omit it, GreenLint loads **`experiments/results/summary.json`** from the installed package layout (works when you run from the repo after `pip install -e .`).
+
+**Exit code:** `0` = no issues, `1` = at least one warning or no Python files, `2` = path does not exist.
+
+---
+
+## 3. Run tests
+
+```bash
+cd REPO
+source .venv/bin/activate
+pip install -e ".[dev]"   # once, if you have not already
+pytest
+```
+
+---
+
+## 4. Regenerate `experiments/results/summary.json`
+
+Benchmarks execute each `benchmarks/ecoN/bad.py` and `good.py` many times and write:
+
+- **`experiments/results/summary.json`** — medians and weights (safe to commit)
+- **`experiments/results/raw_runs.csv`** — raw rows (**gitignored**; do not commit)
+
+Requires benchmark dependencies:
+
+```bash
+cd REPO
+source .venv/bin/activate
+pip install -e ".[benchmarks]"
+```
+
+Recommended: clear CodeCarbon hardware mode so the default **wall-clock proxy** is used (avoids `powermetrics` / `sudo` issues in IDEs):
+
+```bash
+env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
+```
+
+- Omit **`env -u ...`** only if you intentionally set `GREENLINT_CODECARBON=1` (optional; may fall back to the same proxy).
+
+ECO6 is slow; a full run can take **several minutes**.
+
+**Typical order:** run **`pytest`**, then **`run_benchmark.py`** if you want fresh numbers.
+
+---
 
 ## Green Score
 
 - Starts at **10**.
 - Each warning subtracts that rule’s **`weight`** from `summary.json` (default **1.0** if missing).
-- Result is truncated to an integer in **[0, 10]**.
+- Printed score is an integer in **[0, 10]**.
+
+---
 
 ## Rules (ECO1–ECO7)
 
@@ -40,87 +132,32 @@ Each finding can show estimated savings from `summary.json`. With multiple files
 | ECO1 | `for i in range(len(x)): x[i]` |
 | ECO2 | `list = []; for: list.append(...)` |
 | ECO3 | `s += ...` on strings in a loop |
-| ECO4 | `x in` a slow container inside a loop (e.g. list); prefer **set** |
+| ECO4 | `x in` a slow container in a loop; prefer **set** |
 | ECO5 | Unused **heavy** top-level import |
 | ECO6 | `pandas` `iterrows()` |
 | ECO7 | `pandas` `.apply(...)` where vectorized ops suffice |
 
-## Benchmarks & `summary.json`
+---
 
-For each `benchmarks/ecoN/`, **`bad.py`** exercises the anti-pattern and **`good.py`** the preferred style on a **large workload** so wall-clock differences show up in aggregates.
+## Benchmark details (optional)
 
-**Regenerate** `experiments/results/summary.json` (and `raw_runs.csv`):
+- **Proxy energy:** `experiments/codecarbon_utils.py` measures **duration** per run and maps it to J / CO₂ using factors recorded in `summary.json` (`proxy_joules_per_second`, etc.). Override with **`GREENLINT_PROXY_J_PER_S`** and **`GREENLINT_PROXY_CO2_KG_PER_S`** if you want different numeric scale.
+- **`summary.json`** also has **`delta_duration_s_median`** per rule (often easiest to read).
 
-```bash
-env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
-```
-
-- Default **`--repeats`** in the script is **30**; **15** is a common choice. ECO6 (`iterrows` on a large frame) dominates runtime; a full run can take **several minutes** on a laptop.
-
-**Suggested workflow** (tests first, then metrics):
-
-```bash
-pytest
-env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
-```
-
-### How numbers are produced
-
-By default, `experiments/codecarbon_utils.py` runs each script once per repeat, measures **wall-clock time**, and maps it to **proxy** Joules and CO₂ (not a power meter). Values are **category-level** hints for coursework, not certified carbon accounting.
-
-`summary.json` includes, per rule:
-
-- **`delta_joules_median`**, **`delta_co2_grams_median`**, **`weight`** (normalized across rules)
-- **`delta_duration_s_median`**, **`median_duration_bad_s`**, **`median_duration_good_s`** (often easiest to interpret)
-- Top-level **`proxy_joules_per_second`** and **`proxy_co2_kg_per_second`** (defaults **25** and **5×10⁻⁷**)
-
-Override the proxy scale (larger numbers in the file; **bad vs good ratios** unchanged for the same machine):
-
-```bash
-export GREENLINT_PROXY_J_PER_S=40
-export GREENLINT_PROXY_CO2_KG_PER_S=8e-7
-```
-
-### Optional CodeCarbon
-
-In a **normal terminal** (not all IDE sandboxes), you can try:
-
-```bash
-export GREENLINT_CODECARBON=1
-python experiments/run_benchmark.py --repeats 15
-```
-
-If `OfflineEmissionsTracker` fails, the same duration proxy is used.
-
-### If you see `BlockingIOError` or `sudo: unable to allocate pty`
-
-That usually comes from CodeCarbon’s **hardware** path (`powermetrics` / `sudo`). **Unset** `GREENLINT_CODECARBON` (or use `env -u GREENLINT_CODECARBON` as above) so benchmarks use the default time-based proxy.
-
-### Git / teammates
-
-Commit **`greenlint/`**, **`tests/`**, **`benchmarks/`**, **`experiments/*.py`**, **`pyproject.toml`**, and a baseline **`experiments/results/summary.json`**. Do **not** commit **`.venv/`** or **`experiments/results/raw_runs.csv`** (see `.gitignore`).
+---
 
 ## Repo layout
 
 ```
-greenlint/                 # package: CLI, analyzer, rules, estimates
-benchmarks/eco1..eco7/     # bad.py / good.py pairs
-experiments/               # benchmark runner, proxy helpers, results/
+greenlint/                 # package (CLI, rules, estimates)
+benchmarks/eco1..eco7/     # bad.py / good.py
+experiments/               # run_benchmark.py, results/summary.json
 tests/                     # pytest
+benchmarks/demos/          # optional larger demos (see benchmarks/demos/README.md)
 ```
 
-Optional larger scripts: `benchmarks/demos/` (see `benchmarks/demos/README.md`).
-
-## Tests
-
-```bash
-pytest
-```
-
-- **Rules / CLI:** `tests/test_eco*.py`, `test_cli.py`, `test_scoring.py`
-- **AST edge cases:** `tests/test_advanced_patterns.py`
-- **Estimates:** `tests/test_energy_estimates.py`
+---
 
 ## Honest scope
 
-Static analysis plus offline benchmarks give **rough** savings hints. **Do not** treat outputs as production-grade carbon accounting.
+Static analysis plus offline benchmarks give **rough** hints for coursework, not certified carbon accounting for production systems.
