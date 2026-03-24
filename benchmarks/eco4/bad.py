@@ -1,4 +1,6 @@
-values = [1, 2, 3]
-for x in values:
-    if x in [2]:
-        print(x)
+candidates = list(range(25_000))
+hits = 0
+for x in range(10_000):
+    if x in candidates:
+        hits += 1
+print(hits)

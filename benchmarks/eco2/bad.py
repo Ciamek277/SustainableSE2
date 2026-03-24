@@ -1,4 +1,5 @@
-items = [1, 2, 3]
+N = 300_000
 result = []
-for x in items:
+for x in range(N):
     result.append(x * 2)
+print(len(result))

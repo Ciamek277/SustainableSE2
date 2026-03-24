@@ -1,3 +1,6 @@
-lst = [1, 2, 3]
+N = 400_000
+lst = list(range(N))
+acc = 0
 for item in lst:
-    print(item)
+    acc += item
+print(acc)

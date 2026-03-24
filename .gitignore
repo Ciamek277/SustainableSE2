@@ -5,3 +5,6 @@ __pycache__/
 .pytest_cache/
 dist/
 build/
+
+experiments/results/raw_runs.csv
+powermetrics_log.txt

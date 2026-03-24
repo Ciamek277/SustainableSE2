@@ -54,7 +54,7 @@ class ECO3Rule(BaseRule):
                         line=stmt.lineno,
                         code=self.code,
                         message="String concatenation in loop.",
-                        suggestion="use ''.join(...).",
+                        suggestion="collect strings in a list and use ''.join(...).",
                     )
                 )
         return out

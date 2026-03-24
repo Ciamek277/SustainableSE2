@@ -1,4 +1,7 @@
-lst = [1, 2, 3]
+# Large workload so bad vs good separate in duration-based proxy metrics.
+N = 400_000
+lst = list(range(N))
+acc = 0
 for i in range(len(lst)):
-    x = lst[i]
-    print(x)
+    acc += lst[i]
+print(acc)
