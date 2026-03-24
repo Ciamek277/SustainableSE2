@@ -9,7 +9,6 @@ class Diagnostic:
     code: str
     message: str
     suggestion: str
-    # Benchmark-backed category estimates (filled by analyzer from summary.json).
     joules_saved: float = 0.0
     co2_grams_saved: float = 0.0
 

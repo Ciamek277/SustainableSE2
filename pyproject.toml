@@ -5,11 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "greenlint"
 version = "0.2.0"
-description = "GreenLint — AST-based detection of energy-wasteful Python patterns with benchmark-backed estimates"
+description = "AST linter for energy-style Python patterns (course project)"
 readme = "README.md"
 requires-python = ">=3.10"
-# Core CLI: stdlib + loads per-rule estimates from packaged or local JSON.
-# Pandas / CodeCarbon are only needed to run the benchmark pipeline under experiments/.
 dependencies = []
 
 [project.optional-dependencies]

@@ -1,17 +1,12 @@
-"""Tests for estimate attachment and scoring integration with summary.json."""
-
-from __future__ import annotations
-
 import ast
 import json
 from pathlib import Path
 
-from greenlint.estimates import attach_estimates, load_summary
-from greenlint.rules import ALL_RULES
-from greenlint.scoring import green_score
+from greenlint.analyzer import attach_estimates, green_score, load_summary
+from greenlint.rules import run_rules
 
 
-def test_attach_estimates_fills_joules_from_summary(tmp_path: Path) -> None:
+def test_attach_estimates(tmp_path: Path) -> None:
     summary = {
         "rules": {
             "ECO1": {
@@ -25,24 +20,27 @@ def test_attach_estimates_fills_joules_from_summary(tmp_path: Path) -> None:
     p.write_text(json.dumps(summary), encoding="utf-8")
     loaded = load_summary(p)
 
-    src = """
+    tree = ast.parse(
+        """
 lst = [1]
 for i in range(len(lst)):
     _ = lst[i]
 """
-    tree = ast.parse(src)
-    diags = []
-    for rule in ALL_RULES:
-        diags.extend(rule.check(tree))
+    )
+    diags = run_rules(tree)
     out = attach_estimates(diags, loaded)
     assert len(out) == 1
     assert out[0].joules_saved == 1.25
     assert out[0].co2_grams_saved == 0.05
 
 
-def test_green_score_uses_weights_from_summary() -> None:
-    summary = {"rules": {"ECO1": {"weight": 3.0}}}
+def test_green_score_weights() -> None:
     from greenlint.diagnostics import Diagnostic
 
+    summary = {"rules": {"ECO1": {"weight": 3.0}}}
     d = [Diagnostic(1, "ECO1", "m", "s")]
-    assert green_score(d, summary) == 7  # 10 - 3
+    assert green_score(d, summary) == 7
+
+
+def test_green_score_empty() -> None:
+    assert green_score([], {}) == 10

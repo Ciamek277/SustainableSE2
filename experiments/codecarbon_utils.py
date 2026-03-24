@@ -1,15 +1,4 @@
-"""Run a benchmark script once and return duration + proxy energy/CO2.
-
-``codecarbon.EmissionsTracker`` (hardware / ``powermetrics`` / ``sudo``) is **not**
-used: it often breaks in IDE terminals (``BlockingIOError: 35``, ``sudo: unable to
-allocate pty``).
-
-**Default:** one ``runpy.run_path``, then duration → rough ``energy_j`` / ``co2_kg``
-so bad vs good stay comparable in ``summary.json``.
-
-**Optional:** ``GREENLINT_CODECARBON=1`` tries ``OfflineEmissionsTracker`` around a
-**single** run; on any error, falls back to the same duration proxy.
-"""
+"""Run a benchmark script once: wall-clock time -> proxy energy (no powermetrics/sudo by default)."""
 
 from __future__ import annotations
 
@@ -21,12 +10,6 @@ from typing import Any
 
 
 def proxy_scale_factors() -> tuple[float, float]:
-    """(joules per second, kg CO2 per second) for the duration proxy.
-
-    Override with ``GREENLINT_PROXY_J_PER_S`` and ``GREENLINT_PROXY_CO2_KG_PER_S``.
-    Defaults are higher than bare CPU numbers so coursework summaries read in clearer
-    units while **bad vs good ratios** stay the same for a fixed machine.
-    """
     j = float(os.environ.get("GREENLINT_PROXY_J_PER_S", "25"))
     c = float(os.environ.get("GREENLINT_PROXY_CO2_KG_PER_S", "5e-7"))
     return j, c
@@ -34,13 +17,10 @@ def proxy_scale_factors() -> tuple[float, float]:
 
 def _proxy_from_duration(dt: float) -> tuple[float, float]:
     jps, cps = proxy_scale_factors()
-    energy_j = max(dt * jps, 1e-12)
-    co2_kg = max(dt * cps, 1e-18)
-    return energy_j, co2_kg
+    return max(dt * jps, 1e-12), max(dt * cps, 1e-18)
 
 
 def run_script_measured(path: Path) -> dict[str, Any]:
-    """Execute ``path`` as ``__main__``; return duration and monotonic proxy metrics."""
     path = path.resolve()
     use_cc = os.environ.get("GREENLINT_CODECARBON", "").lower() in ("1", "true", "yes")
 

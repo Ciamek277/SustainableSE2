@@ -6,6 +6,7 @@ import csv
 import json
 import sys
 from pathlib import Path
+from statistics import median
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BENCHMARKS = REPO_ROOT / "benchmarks"
@@ -14,7 +15,10 @@ RESULTS = Path(__file__).resolve().parent / "results"
 sys.path.insert(0, str(REPO_ROOT))
 
 from experiments.codecarbon_utils import proxy_scale_factors, run_script_measured  # noqa: E402
-from experiments.stats import median_float  # noqa: E402
+
+
+def _median(xs: list[float]) -> float:
+    return 0.0 if not xs else float(median(xs))
 
 
 def _eco_dirs() -> list[Path]:
@@ -78,14 +82,14 @@ def _summarize(
         good_c = [float(r["co2_kg"]) for r in rs if r["variant"] == "good"]
         bad_t = [float(r["duration_s"]) for r in rs if r["variant"] == "bad"]
         good_t = [float(r["duration_s"]) for r in rs if r["variant"] == "good"]
-        med_bad = median_float(bad_e)
-        med_good = median_float(good_e)
+        med_bad = _median(bad_e)
+        med_good = _median(good_e)
         delta_j = max(0.0, med_bad - med_good)
-        med_bad_c = median_float(bad_c)
-        med_good_c = median_float(good_c)
+        med_bad_c = _median(bad_c)
+        med_good_c = _median(good_c)
         delta_co2_kg = max(0.0, med_bad_c - med_good_c)
-        med_bad_d = median_float(bad_t)
-        med_good_d = median_float(good_t)
+        med_bad_d = _median(bad_t)
+        med_good_d = _median(good_t)
         delta_d = max(0.0, med_bad_d - med_good_d)
         deltas[rule] = delta_j
         max_delta_j = max(max_delta_j, delta_j)
