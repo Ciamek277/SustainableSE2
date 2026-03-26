@@ -6,6 +6,20 @@ Small **course project**: walk the **AST**, flag a few **wasteful patterns**, at
 
 ---
 
+## Quickstart (copy/paste)
+
+```bash
+cd /path/to/SustainableSE2
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev,benchmarks]"
+pytest
+greenlint benchmarks/
+env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
+```
+
+---
+
 ## Install
 
 **Option A — virtualenv (keeps deps in `.venv/`):**
