@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "greenlint"
+version = "0.2.0"
+description = "AST linter for energy-style Python patterns (course project)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+benchmarks = [
+    "pandas>=2.0",
+    "codecarbon>=2.3",
+]
+
+[project.scripts]
+greenlint = "greenlint.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
