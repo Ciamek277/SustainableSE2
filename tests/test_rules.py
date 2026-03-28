@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from greenlint.analyzer import analyze_file
-from tests.conftest import codes_from_source
+from conftest import codes_from_source
 
 ROOT = Path(__file__).resolve().parent.parent
 BENCH = ROOT / "benchmarks"
