@@ -1,0 +1,36 @@
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco1/bad.py:5 ECO1 range(len(...)) loop with indexing. Suggestion: use `for item in lst` or `enumerate()`. Estimated saving: 0.13 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+Warnings: 0
+Green Score: 10
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco2/bad.py:3 ECO2 Building a list with .append() in a loop. Suggestion: use a list comprehension. Estimated saving: 0.19 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+Warnings: 0
+Green Score: 10
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco3/bad.py:3 ECO3 String concatenation in loop. Suggestion: collect strings in a list and use ''.join(...). Estimated saving: 0.34 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+Warnings: 0
+Green Score: 10
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco4/bad.py:3 ECO4 Membership check against a sequence inside a loop. Suggestion: use a set for membership tests. Estimated saving: 6.95 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+Warnings: 0
+Green Score: 10
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco5/bad.py:4 ECO5 Unused heavy top-level import. Suggestion: import locally inside the function or block that needs it. Estimated saving: 0.02 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+Warnings: 0
+Green Score: 10
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco6/bad.py:6 ECO6 Using pandas iterrows() for iteration. Suggestion: use vectorized column operations or .to_numpy() / .values instead. Estimated saving: 20.93 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 8
+Warnings: 0
+Green Score: 10
+/Users/ibrahimbadr/Library/CloudStorage/OneDrive-Personal/Delft masters DSAIT/Y2/Q3/Sustainable Software Engineering/P2/SustainableSE2/benchmarks/eco7/bad.py:5 ECO7 pandas apply() on a simple expression. Suggestion: use vectorized arithmetic or .str / numpy ufuncs instead of apply(). Estimated saving: 0.33 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+Warnings: 0
+Green Score: 10
+Total warnings: 7

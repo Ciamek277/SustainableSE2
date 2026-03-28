@@ -13,9 +13,10 @@ cd /path/to/SustainableSE2
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev,benchmarks]"
+pip install -r requirements.txt
 pytest
-greenlint benchmarks/
-env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
+greenlint benchmarks/ | tee experiments/results/greenlint_report.txt
+env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 30
 ```
 
 ---
@@ -31,6 +32,7 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e .
 pip install -e ".[dev]"            # pytest
 pip install -e ".[benchmarks]"    # pandas + codecarbon; only for experiments/
+pip install -r requirements.txt   # matplotlib + all extras
 ```
 
 **Option B — no venv:** same `pip install` lines with **`python3 -m pip`**, skip `venv` / `activate`.
@@ -43,9 +45,9 @@ From **`REPO`** (with venv activated if you use one):
 
 ```bash
 greenlint benchmarks/eco1/bad.py
-greenlint benchmarks/
+greenlint benchmarks/ | tee experiments/results/greenlint_report.txt
 pytest
-env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
+env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 30
 ```
 
 Last line rebuilds **`experiments/results/summary.json`** (can take a few minutes; ECO6 is heavy). **`raw_runs.csv`** is local-only (gitignored). Use **`env -u GREENLINT_CODECARBON`** so benchmarks use simple **time → proxy energy** instead of CodeCarbon hardware stuff that breaks in some terminals.
@@ -81,6 +83,18 @@ Optional: set **`GREENLINT_PROXY_J_PER_S`** / **`GREENLINT_PROXY_CO2_KG_PER_S`**
 | ECO7 | `pandas` `.apply` where vectorized code works |
 
 **Score:** starts at **10**, subtract each warning’s **weight** from `summary.json` (default **1** if missing), clamp to **0–10**.
+
+---
+
+## Plots
+
+`experiments/plots.py` reads `experiments/results/summary.json` and generates a bar chart showing the **median runtime difference** (in seconds) between the bad and good benchmark variants for each ECO rule.
+
+Run from **`REPO`**:
+
+```bash
+python experiments/plots.py
+```
 
 ---
 

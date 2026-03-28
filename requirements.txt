@@ -1,0 +1,4 @@
+pytest>=7.0
+pandas>=2.0
+codecarbon>=2.3
+matplotlib>=3.7
