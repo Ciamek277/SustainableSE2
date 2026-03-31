@@ -5,60 +5,60 @@
   "proxy_co2_kg_per_second": 5e-07,
   "rules": {
     "ECO1": {
-      "delta_joules_median": 0.28412812507667695,
-      "delta_co2_grams_median": 5.68256250153354e-06,
-      "delta_duration_s_median": 0.011365125003067078,
-      "median_duration_bad_s": 0.04304456250247313,
-      "median_duration_good_s": 0.03167943749940605,
-      "weight": 0.271
+      "delta_joules_median": 0.12523177500156635,
+      "delta_co2_grams_median": 2.504635500031328e-06,
+      "delta_duration_s_median": 0.005009271000062654,
+      "median_duration_bad_s": 0.031737833500073975,
+      "median_duration_good_s": 0.02672856250001132,
+      "weight": 0.26
     },
     "ECO2": {
-      "delta_joules_median": 0.24738646252444596,
-      "delta_co2_grams_median": 4.947729250488919e-06,
-      "delta_duration_s_median": 0.009895458500977838,
-      "median_duration_bad_s": 0.021006687496992527,
-      "median_duration_good_s": 0.011111228996014688,
-      "weight": 0.268
+      "delta_joules_median": 0.18870001249524648,
+      "delta_co2_grams_median": 3.7740002499049295e-06,
+      "delta_duration_s_median": 0.007548000499809859,
+      "median_duration_bad_s": 0.016030104500032394,
+      "median_duration_good_s": 0.008482104000222535,
+      "weight": 0.266
     },
     "ECO3": {
-      "delta_joules_median": 0.5092401123874879,
-      "delta_co2_grams_median": 1.0184802247749756e-05,
-      "delta_duration_s_median": 0.020369604495499516,
-      "median_duration_bad_s": 0.0241456459989422,
-      "median_duration_good_s": 0.003776041503442684,
-      "weight": 0.288
+      "delta_joules_median": 0.340289062495458,
+      "delta_co2_grams_median": 6.805781249909158e-06,
+      "delta_duration_s_median": 0.01361156249981832,
+      "median_duration_bad_s": 0.016809541499924308,
+      "median_duration_good_s": 0.0031979790001059882,
+      "weight": 0.278
     },
     "ECO4": {
-      "delta_joules_median": 10.90421353774218,
-      "delta_co2_grams_median": 0.00021808427075484358,
-      "delta_duration_s_median": 0.4361685415096872,
-      "median_duration_bad_s": 0.43775645850473666,
-      "median_duration_good_s": 0.0015879169950494543,
-      "weight": 1.062
+      "delta_joules_median": 6.945033324996075,
+      "delta_co2_grams_median": 0.00013890066649992148,
+      "delta_duration_s_median": 0.277801332999843,
+      "median_duration_bad_s": 0.27918279199980134,
+      "median_duration_good_s": 0.0013814589999583404,
+      "weight": 0.831
     },
     "ECO5": {
-      "delta_joules_median": 0.0621942624093208,
-      "delta_co2_grams_median": 1.2438852481864115e-06,
-      "delta_duration_s_median": 0.002487770496372832,
-      "median_duration_bad_s": 0.08102612499715178,
-      "median_duration_good_s": 0.07853835450077895,
-      "weight": 0.255
+      "delta_joules_median": 0.02028283750519222,
+      "delta_co2_grams_median": 4.0565675010385027e-07,
+      "delta_duration_s_median": 0.0008113135002076888,
+      "median_duration_bad_s": 0.06830027149999296,
+      "median_duration_good_s": 0.06748895799978527,
+      "weight": 0.252
     },
     "ECO6": {
-      "delta_joules_median": 23.503381775026355,
-      "delta_co2_grams_median": 0.0004700676355005271,
-      "delta_duration_s_median": 0.9401352710010542,
-      "median_duration_bad_s": 0.9403813335011364,
-      "median_duration_good_s": 0.0002460625000821892,
+      "delta_joules_median": 20.93348855000272,
+      "delta_co2_grams_median": 0.0004186697710000544,
+      "delta_duration_s_median": 0.8373395420001088,
+      "median_duration_bad_s": 0.837590729500107,
+      "median_duration_good_s": 0.00025118749999819556,
       "weight": 2.0
     },
     "ECO7": {
-      "delta_joules_median": 0.39987342515814817,
-      "delta_co2_grams_median": 7.997468503162963e-06,
-      "delta_duration_s_median": 0.015994937006325927,
-      "median_duration_bad_s": 0.016369104003388202,
-      "median_duration_good_s": 0.0003741669970622752,
-      "weight": 0.28
+      "delta_joules_median": 0.3348020875023394,
+      "delta_co2_grams_median": 6.6960417500467875e-06,
+      "delta_duration_s_median": 0.013392083500093577,
+      "median_duration_bad_s": 0.013733583499970337,
+      "median_duration_good_s": 0.00034149999987675983,
+      "weight": 0.278
     }
   }
 }

@@ -46,6 +46,7 @@ Windows:
 
 ```bash
 pip install -e ".[dev,benchmarks]"
+pip install -r requirements.txt
 ```
 
 What this installs:
@@ -88,7 +89,8 @@ Expected:
 Scan all benchmark files:
 
 ```bash
-greenlint benchmarks/
+greenlint benchmarks/ | tee experiments/results/greenlint_report.txt
+
 ```
 
 ### 5) Regenerate benchmark summary
@@ -143,6 +145,18 @@ env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
 - energy values are proxy estimates based on benchmark runtime, not direct hardware power readings
 - results vary by machine/load; use them for relative comparison, not absolute accounting
 - rules are intentionally simple for course scope, so some real-world edge cases are out of scope
+
+## Plots
+
+`experiments/plots.py` reads `experiments/results/summary.json` and generates a bar chart showing the **median runtime difference** (in seconds) between the bad and good benchmark variants for each ECO rule.
+
+Run from **`REPO`**:
+
+```bash
+python experiments/plots.py
+```
+
+---
 
 ## Scope
 
