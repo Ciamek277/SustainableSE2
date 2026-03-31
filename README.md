@@ -1,12 +1,123 @@
 # GreenLint
 
-Small **course project**: walk the **AST**, flag a few **wasteful patterns**, attach rough **Joules / CO₂** numbers from **`experiments/results/summary.json`**, print a **0–10 score**. Not real power measurement.
+GreenLint is a course project CLI that scans Python files with `ast` and reports 7 energy-style anti-patterns (`ECO1`...`ECO7`).
 
-**Needs:** Python **3.10+**, repo root = folder with **`pyproject.toml`** (call it **`REPO`** below).
+It also prints:
+- estimated Joules / CO2 per warning (loaded from `experiments/results/summary.json`)
+- a Green Score from 0 to 10
 
----
+These energy values are benchmark-derived estimates, not direct hardware measurements.
 
-## Quickstart (copy/paste)
+## What it does
+
+- scans a Python file or directory and reports ECO1..ECO7 warnings
+- shows line number, rule code, short suggestion, and estimated savings
+- computes a simple Green Score (0-10) from benchmark-derived rule weights
+- lets you regenerate benchmark summary data (`summary.json`) from `bad.py`/`good.py` pairs
+
+## Example output
+
+```text
+/.../benchmarks/eco1/bad.py:5 ECO1 range(len(...)) loop with indexing. Suggestion: use `for item in lst` or `enumerate()`. Estimated saving: 0.27 J, 0.000 g CO2e
+Warnings: 1
+Green Score: 9
+```
+
+## Requirements
+
+- Python 3.10+
+- Run commands from the folder that contains `pyproject.toml` (examples below use `/path/to/SustainableSE2`)
+
+## Step-by-step (recommended)
+
+### 1) Create and activate a virtual environment
+
+```bash
+cd /path/to/SustainableSE2
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Windows:
+- `cmd`: `.venv\Scripts\activate.bat`
+- PowerShell: `.venv\Scripts\Activate.ps1`
+
+### 2) Install dependencies
+
+```bash
+pip install -e ".[dev,benchmarks]"
+```
+
+What this installs:
+- package + CLI (`greenlint`)
+- test tools (`pytest`)
+- benchmark deps (`pandas`, `codecarbon`)
+
+### 3) Run tests
+
+```bash
+pytest
+```
+
+Expected: all tests pass.
+
+### 4) Run the linter
+
+Single file with known warning:
+
+```bash
+greenlint benchmarks/eco1/bad.py
+```
+
+Expected:
+- one `ECO1` warning
+- `Warnings: 1`
+- non-zero exit code (`1`)
+
+Single file without warning:
+
+```bash
+greenlint benchmarks/eco1/good.py
+```
+
+Expected:
+- `Warnings: 0`
+- `Green Score: 10`
+- exit code `0`
+
+Scan all benchmark files:
+
+```bash
+greenlint benchmarks/
+```
+
+### 5) Regenerate benchmark summary
+
+```bash
+env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
+```
+
+Expected output includes:
+
+```text
+Wrote .../experiments/results/summary.json
+```
+
+This command updates:
+- `experiments/results/summary.json` (commit this if you want updated baseline values)
+- `experiments/results/raw_runs.csv` (local file, gitignored)
+
+`--repeats 15` can take a few minutes (ECO6 is the slowest benchmark).
+
+## Optional flags/env vars
+
+- `greenlint --summary experiments/results/summary.json <path>`
+  - use a specific summary file
+- `GREENLINT_PROXY_J_PER_S`
+- `GREENLINT_PROXY_CO2_KG_PER_S`
+  - scale proxy values used in benchmark-generated estimates
+
+## Minimal workflow for teammates
 
 ```bash
 cd /path/to/SustainableSE2
@@ -18,72 +129,21 @@ greenlint benchmarks/
 env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
 ```
 
----
+## Project structure
 
-## Install
+- `greenlint/rules.py` - ECO1..ECO7 checks
+- `greenlint/analyzer.py` - run rules, load summary, scoring helpers
+- `greenlint/cli.py` - command line entrypoint
+- `benchmarks/eco1`...`eco7` - `bad.py` / `good.py` benchmark pairs
+- `experiments/` - benchmark runner + summary generation
+- `tests/` - pytest suite
 
-**Option A — virtualenv (keeps deps in `.venv/`):**
+## Limitations
 
-```bash
-cd REPO
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -e .
-pip install -e ".[dev]"            # pytest
-pip install -e ".[benchmarks]"    # pandas + codecarbon; only for experiments/
-```
-
-**Option B — no venv:** same `pip install` lines with **`python3 -m pip`**, skip `venv` / `activate`.
-
----
-
-## Run
-
-From **`REPO`** (with venv activated if you use one):
-
-```bash
-greenlint benchmarks/eco1/bad.py
-greenlint benchmarks/
-pytest
-env -u GREENLINT_CODECARBON python experiments/run_benchmark.py --repeats 15
-```
-
-Last line rebuilds **`experiments/results/summary.json`** (can take a few minutes; ECO6 is heavy). **`raw_runs.csv`** is local-only (gitignored). Use **`env -u GREENLINT_CODECARBON`** so benchmarks use simple **time → proxy energy** instead of CodeCarbon hardware stuff that breaks in some terminals.
-
-Optional: set **`GREENLINT_PROXY_J_PER_S`** / **`GREENLINT_PROXY_CO2_KG_PER_S`** to scale numbers in the JSON without changing timings.
-
----
-
-## Layout
-
-| Path | Role |
-|------|------|
-| `greenlint/rules.py` | ECO1–ECO7 checks |
-| `greenlint/analyzer.py` | parse, run rules, load `summary.json`, scores |
-| `greenlint/cli.py` | CLI |
-| `greenlint/diagnostics.py` | one small `Diagnostic` type |
-| `benchmarks/eco1` … `eco7` | `bad.py` / `good.py` pairs (large on purpose) |
-| `experiments/` | `run_benchmark.py`, `benchmark_runner.py`, `codecarbon_utils.py`, `results/summary.json` |
-| `tests/` | pytest |
-
----
-
-## Rules
-
-| Code | Idea |
-|------|------|
-| ECO1 | `range(len(x))` + index |
-| ECO2 | build list with `.append` in a loop |
-| ECO3 | `s += ...` on strings in a loop |
-| ECO4 | `x in` something slow inside a loop |
-| ECO5 | unused “heavy” import at top level |
-| ECO6 | `pandas` `iterrows()` |
-| ECO7 | `pandas` `.apply` where vectorized code works |
-
-**Score:** starts at **10**, subtract each warning’s **weight** from `summary.json` (default **1** if missing), clamp to **0–10**.
-
----
+- energy values are proxy estimates based on benchmark runtime, not direct hardware power readings
+- results vary by machine/load; use them for relative comparison, not absolute accounting
+- rules are intentionally simple for course scope, so some real-world edge cases are out of scope
 
 ## Scope
 
-Coursework demo: static checks + offline benchmarks give **ballpark** hints, not accounting-grade CO₂.
+This is a coursework tool: static pattern detection + offline benchmark estimates. It is not intended to be production carbon accounting.
